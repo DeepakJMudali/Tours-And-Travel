@@ -1,0 +1,26 @@
+doctype html
+
+extends base
+
+block content
+    main.main
+        .success-message
+            h1 Payment Successful! 🎉
+            p Thank you for your purchase.
+
+        .details
+            h2 Payment Details
+            ul
+                li
+                    strong Transaction ID: 
+                    | #{transactionId}
+                li
+                    strong Item Purchased: 
+                    | #{itemName}
+                li
+                    strong Amount Paid: 
+                    | $#{amountPaid}
+
+        .actions
+            a.button(href="/") Go Back to Home
+            a.button(href="/orders") View Your Orders

@@ -1,0 +1,11 @@
+mixin reviewCard(review)
+  .reviews__card
+    .reviews__avatar
+      // Use fallback image if photo is missing or invalid
+      img.reviews__avatar-img(src=`/img/users/${review.user && review.user.photo || 'default-avatar.jpg'}`, alt=`${review.user && review.user.name || 'Anonymous'}`)
+      h6.reviews__user= review.user && review.user.name || 'Anonymous'
+    p.reviews__text= review.review
+    .reviews__rating
+      each star in [1, 2, 3, 4, 5]
+        svg.reviews__star(class=`reviews__star--${review.rating >= star ? 'active' : 'inactive'}`)
+          use(xlink:href='/img/icons.svg#icon-star')

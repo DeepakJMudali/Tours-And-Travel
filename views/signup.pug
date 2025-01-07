@@ -1,0 +1,29 @@
+extends base
+
+block content
+  main.main
+    .signup-form
+      h2.heading-secondary.ma-bt-lg Signup your account
+      form.form.form--signup
+        .form__group
+          label.form__label(for='name') Name
+          input#name.form__input(type='text', placeholder='Enter Your Name', required, autocomplete='name', aria-label='Name')
+        .form__group
+          label.form__label(for='email') Email address
+          input#emailll.form__input(type='email', placeholder='you@example.com', required, autocomplete='email', aria-label='Email address')
+        .form__group.ma-bt-md
+          label.form__label(for='password') Password
+          input#passwordd.form__input(type='password', placeholder='••••••••', required, minlength='8', autocomplete='current-password', aria-label='Password')
+        .form-group.ma-bt-md
+          label.form__label(for="confirmPassword") Confirm Password
+          input#Confirmpasswordd.form__input(type="password", name="confirmPassword", minlength='8', autocomplete='new-password' required placeholder="Confirm your password", aria-label='confirmPassword')
+        .form-group.ma-bt-md
+          label.form__label(for="role") Select Role
+          select#role.form__role(name="role",)
+           option(value="user" selected) User
+           option(value="admin") Admin
+        .form__group
+          button.btn.btn--green(type='submit') SignUp
+      div.containerLoginText
+        p.nav__el-login Already have an account?
+        a.nav__el-login(href="/login")  Log in here.

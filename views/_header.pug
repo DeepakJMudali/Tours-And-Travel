@@ -1,0 +1,32 @@
+header.header
+  nav.nav
+    .header__logo
+      a.nav__el(href='/')
+        span Natours
+        img(src='/img/logo2.png' alt='Natours logo')
+
+    .hamburger
+      div
+      div
+      div
+
+    .nav__menu
+      ul.header__nav
+        li
+          a(href='#') About us
+        li
+          a(href='#') Download apps
+        li
+          a(href='#') Become a guide
+        li  
+          a(href='#') Careers
+        li
+          a(href='#') Contact
+      .nav__user
+        if user && user.isloggedInUser
+          a.nav__el(href='/me')
+            img.nav__user-img(src=`/img/users/${user.photo}` alt=`Photo of ${user.name}`)
+            span= user.name.split(' ')[0]
+        else
+          a.nav__el.nav__el--cta(href='/login') Log in
+          a.nav__el.nav__el--cta(href='/signup') Sign up
