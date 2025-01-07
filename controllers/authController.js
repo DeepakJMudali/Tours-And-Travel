@@ -13,7 +13,6 @@ const signToken= (id,role)=>{
 const createSendToken= (user,statusCode,res)=>
 {
   const token = signToken(user._id,user.role );
-  console.log("token",token)
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -45,15 +44,12 @@ exports.signupUser= catchAsync(async (req, res,next) => {
 
   exports.loginUser = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
-    console.log("email",email)
     // 1) Check if email and password exist
     if (!email || !password) {
       return next(new AppError('Please provide email and password!', 400));
     }
     // 2) Check if user exists && password is correct
     const user = await User.findOne({ email }).select('+password +isloggedInUser');
-    
-  console.log("userrrrr",user)
     if (!user || !(await user.correctPassword(password, user.password))) {
       return next(new AppError('Incorrect email or password', 401));
     }
@@ -134,7 +130,6 @@ exports.isLoggedIn = async (req, res, next) => {
 
       // 2) Check if user still exists
       const currentUser = await User.findById(decoded.id);
-      console.log("currentUser",currentUser)
       if (!currentUser) {
         return next();
       }
@@ -209,7 +204,6 @@ exports.restrictTo=(...roles)=>
       .createHash('sha256')
       .update(req.params.token)
       .digest('hex');
-  console.log("hashedToken",hashedToken)
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() }

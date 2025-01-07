@@ -33,7 +33,7 @@ export const bookTour = async (tourId) => {
       console.log('Razorpay Order:', order);
 
       const options = {
-        key: "rzp_test_SRncxCVdOvoXwz",
+        key: process.env.RAZORPAY_ID_KEY,
         amount: order.amount,
         currency: order.currency,
         name: order.notes.product_name,

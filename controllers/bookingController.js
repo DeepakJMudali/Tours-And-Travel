@@ -64,25 +64,23 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
     const orderId = payment.order_id;
     const razorpayPaymentId = payment.id;
 
-    console.log('Payment captured:', payment);
+ 
 
     // Get the corresponding order
     const order = await razorpay.orders.fetch(orderId);
-    console.log('Fetched order:', order);
+  
 
     const tourId = order.notes.tour_id;  // Retrieve `tourId` from notes
-    console.log('Tour ID:', tourId);
+ 
 
     const tour = await Tour.findById(tourId);
     if (!tour) {
-      console.log('Tour not found');
       return next(new Error('Tour not found.'));
     }
 
     const userId = order.notes.user_id;  // Retrieve `userId` from notes
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found');
       return next(new Error('User not found.'));
     }
 
@@ -95,7 +93,6 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
       orderId: orderId
     });
 
-    console.log('Booking created:', newBooking);
   }
 
   res.status(200).json({ received: true });
@@ -107,38 +104,32 @@ exports.createBooking = catchAsync(async (req, res, next) => {
   const { user, tour, price, paymentId, orderId } = req.body;
 
   // Log the incoming request body
-  console.log('Incoming Booking Data:', req.body);
 
   try {
     // Check if `user` is provided
     if (!user) {
-      console.log('User ID is missing in the request body.');
       return next(new Error('User ID is required.'));
     }
 
     // Check if `tour` is provided
     if (!tour) {
-      console.log('Tour ID is missing in the request body.');
       return next(new Error('Tour ID is required.'));
     }
 
     // Ensure the user exists
     const existingUser = await User.findById(user);
     if (!existingUser) {
-      console.log('User not found in the database.');
       return next(new Error('User not found.'));
     }
 
     // Ensure the tour ID format is valid
     if (!mongoose.Types.ObjectId.isValid(tour)) {
-      console.log('Invalid tour ID format:', tour);
       return next(new Error('Invalid tour ID format.'));
     }
 
     // Ensure the tour exists
     const existingTour = await Tour.findById(tour);
     if (!existingTour) {
-      console.log('Tour not found in the database.');
       return next(new Error('Tour not found.'));
     }
 
@@ -157,8 +148,6 @@ exports.createBooking = catchAsync(async (req, res, next) => {
   .populate('user', 'name email')
   .populate('tour', 'name');
 
-    console.log('Booking created successfully:', populatedBooking);
-
     res.status(201).json({
       status: 'success',
       data: {
@@ -166,7 +155,6 @@ exports.createBooking = catchAsync(async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Error Creating Booking:', error.message);
     res.status(400).json({
       status: 'fail',
       message: error.message,

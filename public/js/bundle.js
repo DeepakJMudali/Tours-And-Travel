@@ -13337,7 +13337,7 @@ var bookTour = exports.bookTour = /*#__PURE__*/function () {
             order = response.data.order;
             console.log('Razorpay Order:', order);
             options = {
-              key: "rzp_test_SRncxCVdOvoXwz",
+              key: undefined,
               amount: order.amount,
               currency: order.currency,
               name: order.notes.product_name,
@@ -13707,7 +13707,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53906" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55388" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
