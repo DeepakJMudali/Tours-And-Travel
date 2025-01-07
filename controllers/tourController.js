@@ -56,7 +56,6 @@ exports.resizeTourImages = catchAsync(async (req, res, next) => {
 
   next();
 });
-//  console.log("reqqq",req.files)
 exports.aliasTopTours=(req,res,next)=>{
   req.query.limit= "5"
   req.query.sort = "-ratingsAverage,price"
@@ -222,7 +221,6 @@ exports.getMonthlyPlans = catchAsync(async(req,res,next)=>{
 // /tours-within/:distance/center/:latlng/unit/:unit
 // /tours-within/233/center/34.111745,-118.113491/unit/mi
 exports.getToursWithin = catchAsync(async (req, res, next) => {
-  console.log("params",req.params)
   const { distance, latlng, unit } = req.params;
   const [lat, lng] = latlng.split(',');
 

@@ -42,7 +42,6 @@ const filterBody =(reqBodyObj, ...fieldsName)=>
       if(fieldsName.includes(el)) newFieldsObj[el] = reqBodyObj[el]
       
     })
-    console.log("newFieldsObj",newFieldsObj)
     return newFieldsObj;
   }
 
@@ -65,7 +64,6 @@ exports.getAllUsers = catchAsync(async (req, res,next) => {
 
 exports.getUser = catchAsync(async (req, res) => {
   const user = await Users.findById({_id: req.params.id})
- console.log("user123",user)
   if(!user)
   {
     // for custom error
@@ -111,7 +109,6 @@ exports.deleteMe = catchAsync(async(req,res,next)=>{ // It will not get deleted 
 
 
 exports.getMe = (req, res, next) => { // it will fetch the data of current logged in user
-  console.log("idddddddd",req.user.id)
   req.params.id = req.user.id;  // req.user is only for authenticated user or current logged in user
   next();
 };
@@ -131,7 +128,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   }
 
   // 2) Filtered out unwanted fields names that are not allowed to be updated
-  console.log("updatemEEE",req.body)
   const filteredBody = filterBody(req.body, 'name', 'email','photo');
   //if (req.file) filteredBody.photo = req.file.originalname;
   // 3) Update user document
@@ -139,7 +135,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true
   });
-  console.log("updatedUser",updatedUser)
   res.status(200).json({
     status: 'success',
     data: {

@@ -82,23 +82,13 @@ reviewSchema.post('save', function() {
   // this points to current review
 
   //// after get saved into the document
-  console.log("conss",this.constructor)
   this.constructor.calcAverageRatings(this.tour); // this.tour will refer to tour property of review model.
 });
 
-console.log("constructor",this.constructor.locations)
 
-// findByIdAndUpdate
-// findByIdAndDelete
 
-//before findByIdAndUpdate by pre, it will not give the updated review .....data. 
-reviewSchema.pre(/^findOneAnd/, async function(next) { // in query middleware, we don't have direct acces to the review documents
-
-  //To bind r with this and to access this.r from pre to post middleware.
-
-  //Query middleware can not access to the direct document. So we used this.findOne) to get all documents in query middleware scope.
-  this.r = await this.findOne();  // so we used one varriable to get all the documents from DB.
-   console.log("errr",this.r.constructor);
+reviewSchema.pre(/^findOneAnd/, async function(next) { 
+  this.r = await this.findOne();  
   next();
 });
  

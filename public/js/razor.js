@@ -19,18 +19,18 @@ const loadRazorpayScript = () => {
 };
 
 export const bookTour = async (tourId) => {
-  console.log('Booking tour:', tourId, process.env);
+
 
   try {
     // Ensure Razorpay script is loaded
     await loadRazorpayScript();
 
     const response = await axios.get(`/api/v1/bookings/checkout-session/${tourId}`);
-    console.log('API Response:', response.data);
+  
 
     if (response && response.status === 200) {
       const order = response.data.order;
-      console.log('Razorpay Order:', order);
+
 
       const options = {
         key: process.env.RAZORPAY_ID_KEY,
@@ -42,7 +42,7 @@ export const bookTour = async (tourId) => {
         order_id: order.id,
         // callbackUrl : `${req.protocol}://${req.get('host')}/tour?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
         handler: function (paymentResponse) {
-          console.log('Payment Success:', paymentResponse);
+   
           showAlert('success', 'Payment successful!');
         },
         prefill: {
@@ -58,11 +58,11 @@ export const bookTour = async (tourId) => {
         },
       };
 
-      console.log('Razorpay Options:', options);
+   
       const rzp = new Razorpay(options); // This now works after script is loaded
 
       rzp.on('payment.failed', function (response) {
-        console.error('Payment Failed:', response.error);
+    
         alert(`Payment Failed: ${response.error.description}`);
       });
 

@@ -113,14 +113,11 @@ userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
 ) {
-  console.log(candidatePassword,
-    userPassword)
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 // Password changed after token issued
 userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
-    console.log("this.passwordChangedAt",this.passwordChangedAt)
     if (this.passwordChangedAt) {
       const changedTimestamp = parseInt(
         this.passwordChangedAt.getTime() / 1000,
@@ -141,7 +138,6 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
     const resetToken = crypto.randomBytes(32).toString('hex')
     this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest('hex')
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000  // resetpassword link will get expire after 10 min
-    // console.log({resetToken},this.passwordResetToken)
     return resetToken;
   }
 

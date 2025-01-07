@@ -160,12 +160,7 @@ tourSchema.post('save',function(doc,next){
 
 
 //QUERY Middleware :  Query middleware allows you to add custom logic to queries, such as find and findOne.
-// Impleneted for all types of find methods so used regular expression.
 
-// tourSchema.pre("find",function(next){
-//   this.find({secretTour :{$ne: true}})
-//   next();
-// })
 
 tourSchema.pre(/^find/,function(next){   // query Midleware
   this.find({secretTour :{$ne: true}})
@@ -180,23 +175,9 @@ tourSchema.pre(/^find/, function(next){
   next();
 })
 
-tourSchema.post(/^find/,function(docs,next){
-  console.log(`query took time ${Date.now()- this.start} milliseconds`)
-  console.log(docs)
-  next();
-})
 
 // Aggregation Middleware: To add some custom logic to aggregate, instead of adding in controller level, we can use model level for all aggregate method used in controller.
 
-// tourSchema.pre('aggregate', function(next){
-
-// //Here it will add the custom logic to remove the document from response which have secretTour true for all aggregation in contoller.
-// console.log("pipeline",this.pipeline())
-
-//  this.pipeline().unshift({$match: { secretTour: { $ne: true } }}) //it will get hide from all the dcoument that have secretTour as true.
-
-//    next();
-// })
   const Tour = mongoose.model("Tour",tourSchema)
   
   module.exports = Tour;

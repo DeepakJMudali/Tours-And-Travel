@@ -18,7 +18,6 @@ exports.deleteOne = Model =>
 
   exports.updateOne = Model =>
     catchAsync(async (req, res, next) => {
-      console.log("abcd",req.files)
       const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true
@@ -52,7 +51,6 @@ exports.deleteOne = Model =>
     catchAsync(async (req, res, next) => {
       
       let query = Model.findById(req.params.id);
-      console.log("popOptions",popOptions)
       if (popOptions) query = query.populate(popOptions);
       const doc = await query;
   
