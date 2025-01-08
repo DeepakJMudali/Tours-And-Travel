@@ -128,8 +128,16 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
 
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+app.use((err, req, res, next) => {
+  // Default status and message
+  err.status = err.status || 'error';
+  err.statusCode = err.statusCode || 500;
+
+  // Send error response
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
 });
 
 app.use(globalErrorHandler);
