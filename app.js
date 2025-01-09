@@ -20,10 +20,10 @@ const app = express();
 
 
 
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://api.mapbox.com; style-src 'self' 'unsafe-inline'; worker-src 'self' blob: https://api.mapbox.com;");
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://api.mapbox.com; style-src 'self' 'unsafe-inline'; worker-src 'self' blob: https://api.mapbox.com;");
+//   next();
+// });
 
 app.use(cors());
 app.set('view engine', 'pug');

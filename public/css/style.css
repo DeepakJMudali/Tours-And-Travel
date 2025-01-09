@@ -291,12 +291,6 @@ body {
   align-items: center;
 }
 
-.header__logo a {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: white;
-}
 
 .header__logo img {
   width: 40px;
@@ -991,134 +985,67 @@ a.nav__el-login:hover {
 /* Footer Styles */
 
 
-.footer {
-  background-color: #333; /* Dark background for the footer */
-  color: white; /* White text */
-  padding: 2rem 5rem; /* Padding around footer */
+/* General footer styling */
+footer.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
   text-align: center;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.footer__logo span {
-  font-size: 4em;
-  font-weight: 900;
+/* Styling for the logo section */
+.footer__logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .footer__logo img {
-  width: 150px; /* Adjust logo size */
-  height: auto;
+  height: 50px;
+  width: auto;
+  margin-right: 10px;
 }
 
-
-
-/* Social Media Icons (Optional - if needed) */
-.footer__social {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem; /* Space between nav and social media icons */
-}
-
-.footer__social a {
-  color: #fff;
-  margin: 0 1rem; /* Space between icons */
-  font-size: 1.5rem; /* Icon size */
-  transition: color 0.3s ease;
-}
-
-.footer__social a:hover {
-  color: #3498db; /* Change icon color on hover */
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .footer__nav {
-    flex-direction: column;
-  }
-
-  .footer__nav li {
-    margin: 0.5rem 0;
-  }
-}
-@media only screen and (max-width: 50em) {
-  .footer {
-    grid-template-columns: 1fr;
-    grid-row-gap: 1.25rem;
-    justify-items: center;
-  }
-}
-@media only screen and (max-width: 50em) {
-  .footer__logo {
-    grid-row: 1;
-  }
-}
-
-/* Define the fade-in animation */
-
-/* Footer Navigation */
-.footer__nav {
-  list-style: none;
-  display: flex; /* Use flexbox for modern layout */
-  justify-content: left; /* Align items to the left */
-  font-size: 1.2rem; /* Adjust font size for better readability */
-  padding: 0; /* Remove default padding from the list */
-  margin: 0; /* Remove default margin */
-  font-size: large;
-}
-
-/* Link Styling */
-.footer__nav a {
-  text-decoration: none; /* Remove underline from links */
-  color: #333; /* Set a color for the links */
-  font-weight: 500; /* Slightly bold links */
-  transition: color 0.3s ease, transform 0.3s ease; /* Smooth hover effects */
-  display: inline-block; /* Required for transform */
-}
-
-.footer__nav a:hover {
-  color: #0073e6; /* Change color on hover */
-  transform: translateY(-3px); /* Add subtle vertical movement on hover */
-  animation: bounce 0.3s ease; /* Add bounce effect on hover */
-}
-
-/* Bounce Effect */
-@keyframes bounce {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  .footer__nav {
-    flex-direction: column; /* Stack items vertically on smaller screens */
-    align-items: center; /* Center items on smaller screens */
-  }
-
-  .footer__nav li {
-    margin-right: 0; /* Remove horizontal spacing for vertical layout */
-    margin-bottom: 10px; /* Add spacing between items vertically */
-  }
-
-  .footer__nav li:last-child {
-    margin-bottom: 0; /* Remove bottom margin for last item */
-  }
+.footer__logo .text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fcfcfc; /* Optional, change logo text color */
 }
 
 
 .footer__copyright {
-  justify-self:flex-end;
-  color: #999;
-  font-size: large;
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.5;
+  margin-top: 10px;
 }
-@media only screen and (max-width: 50em) {
+
+
+@media (max-width: 600px) {
+  .footer__logo {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer__logo img {
+    margin-bottom: 5px;
+  }
+
+  .footer__logo .text {
+    font-size: 20px;
+  }
+
   .footer__copyright {
-    justify-self: center;
+    font-size: 12px;
   }
 }
+
 
 @keyframes fadeIn {
   0% {
