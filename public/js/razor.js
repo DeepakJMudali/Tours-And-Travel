@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
 require('dotenv').config();
-// Make sure Razorpay script is loaded before using it
+// To check Razorpay script is loaded before using it
 const loadRazorpayScript = () => {
   return new Promise((resolve, reject) => {
     if (typeof Razorpay !== 'undefined') {
@@ -22,7 +22,7 @@ export const bookTour = async (tourId) => {
 
 
   try {
-    // Ensure Razorpay script is loaded
+ 
     await loadRazorpayScript();
 
     const response = await axios.get(`/api/v1/bookings/checkout-session/${tourId}`);
@@ -59,7 +59,7 @@ export const bookTour = async (tourId) => {
       };
 
    
-      const rzp = new Razorpay(options); // This now works after script is loaded
+      const rzp = new Razorpay(options); 
 
       rzp.on('payment.failed', function (response) {
     

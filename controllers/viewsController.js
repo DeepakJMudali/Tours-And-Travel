@@ -5,10 +5,8 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
-  // 1) Get tour data from collection
   const tours = await Tour.find();
-  // 2) Build template
-  // 3) Render that template using tour data from 1)
+
  
   
   res.status(200).render('overview', {
@@ -18,7 +16,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
-  // 1) Get the data, for the requested tour (including reviews and guides)
+
   const tour = await Tour.findOne({ slug: req.params.slug }).populate({
     path: 'reviews',
     fields: 'review rating user'
@@ -28,8 +26,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     return next(new AppError('There is no tour with that name.', 404));
   }
 
-  // 2) Build template
-  // 3) Render template using data from 1)
+
  
   res.status(200).render('tour', {
     title: `${tour.name} Tour`,
@@ -51,14 +48,14 @@ exports.getSignUpForm = (req, res) => {
 
 
 exports.getAccount = (req, res) => {
-  // Ensure 'user' is available before rendering
+
   if (!req.user) {
-    return res.redirect('/login'); // Or handle it as needed
+    return res.redirect('/login');
   }
   
   res.render('account', {
      title: 'Your account',
-    user: req.user, // Make sure 'req.user' contains the authenticated user's data
+    user: req.user, 
   });
 };
 
@@ -84,18 +81,18 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
 
   exports.getMyTours = catchAsync(async (req, res, next) => {
     try {
-      // Get the user's bookings and corresponding tours
+  
       const bookings = await Booking.find({ user: req.user.id }).populate('user', 'name email')
       .populate('tour', 'name');
       const tourIDs = bookings.map(el => el.tour);
       const tours = await Tour.find({ _id: { $in: tourIDs } });
-      // Render the 'overview' page with the list of tours
+
       res.status(200).render('overview', {
         title: 'My Tours',
         tours
       });
     } catch (err) {
-      next(err);  // Handle errors
+      next(err); 
     }
   });
 
