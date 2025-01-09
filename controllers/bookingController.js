@@ -2,9 +2,11 @@ const Razorpay = require('razorpay');
 const catchAsync = require('../utils/catchAsync');
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingModel');
+const crypto = require('crypto');
 const User = require('../models/userModel');
 const factory = require('./handlerFactory');
 const mongoose = require('mongoose');
+
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_ID_KEY,
@@ -18,24 +20,26 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   }
 
   const imageUrl = `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`;
-
   
+  // Assuming `req.user.id` is the user making the booking
+  const userId = req.user.id;
+
   const options = {
     amount: tour.price * 100, 
     currency: 'INR',
     receipt: `receipt_${new Date().getTime()}`,
     payment_capture: 1, 
     notes: {
+      tour_id: tour.id,   // Ensure tour_id is here
+      user_id: userId,    // Ensure user_id is here
       product_name: tour.name,
       product_description: tour.summary,
       image_url: imageUrl
     }
   };
 
-
   const order = await razorpay.orders.create(options);
 
- 
   res.status(200).json({
     status: 'success',
     order
@@ -43,9 +47,10 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 });
 
 
+
 exports.webhookCheckout = catchAsync(async (req, res, next) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const crypto = require('crypto');
+
   
   const shasum = crypto.createHmac('sha256', secret);
   shasum.update(req.rawBody);
@@ -62,18 +67,20 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
     const orderId = payment.order_id;
     const razorpayPaymentId = payment.id;
 
-   
+    // Check if the payment was actually captured
     if (payment.status !== 'captured') {
       return res.status(200).json({ received: true, message: 'Payment not captured. No booking will be created.' });
     }
 
-
+    // Get the order details from Razorpay
     const order = await razorpay.orders.fetch(orderId);
+    const tourId = order.notes.tour_id;  // Retrieve `tour_id` from notes
+    const userId = order.notes.user_id;  // Retrieve `user_id` from notes
 
-    const tourId = order.notes.tour_id;  // Retrieve `tourId` from notes
-    const userId = order.notes.user_id;  // Retrieve `userId` from notes
+    // Debugging: Log the values from the notes
+    console.log("Order Notes:", order.notes);
 
-
+    // Fetch the tour and user details
     const tour = await Tour.findById(tourId);
     if (!tour) {
       return next(new Error('Tour not found.'));
@@ -84,77 +91,62 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
       return next(new Error('User not found.'));
     }
 
+    // Create the booking
     const newBooking = await Booking.create({
       tour: tourId,
       user: user.id,
-      price: order.amount / 100, 
+      price: order.amount / 100,  // Convert back to INR
       paymentId: razorpayPaymentId,
-      orderId: orderId
+      orderId: orderId,
     });
 
-    res.status(200).json({ received: true, message: 'Payment successful, booking created.' });
-  }
+    // Populate booking with user and tour data
+    const populatedBooking = await Booking.findById(newBooking._id)
+      .populate('user', 'name email')
+      .populate('tour', 'name');
 
-  else if (event.event === 'payment.failed') {
-    const payment = event.payload.payment.entity;
-    const razorpayPaymentId = payment.id;
-
-    console.log(`Payment failed: ${razorpayPaymentId}`);
-
-
+    res.status(200).json({
+      received: true,
+      message: 'Payment successful, booking created.',
+      booking: populatedBooking,
+    });
+  } else if (event.event === 'payment.failed') {
+    console.log(`Payment failed: ${event.payload.payment.entity.id}`);
     res.status(200).json({ received: true, message: 'Payment failed.' });
-  }
-
-  else if (event.event === 'payment.canceled') {
-    const payment = event.payload.payment.entity;
-    const razorpayPaymentId = payment.id;
-
-    console.log(`Payment canceled: ${razorpayPaymentId}`);
-
-
+  } else if (event.event === 'payment.canceled') {
+    console.log(`Payment canceled: ${event.payload.payment.entity.id}`);
     res.status(200).json({ received: true, message: 'Payment canceled.' });
-  }
-  else {
+  } else {
     res.status(200).json({ received: true });
   }
 });
 
 
 
-
 exports.createBooking = catchAsync(async (req, res, next) => {
-  const { user, tour, price, paymentId, orderId } = req.body;
-
-
-
+  const {tour, price, paymentId, orderId } = req.body;
+  const user = req.user.id; 
   try {
-
-    if (!user) {
-      return next(new Error('User ID is required.'));
+    if (!user || !tour || !price || !paymentId || !orderId) {
+      return next(new Error('All fields are required.'));
     }
-
-
-    if (!tour) {
-      return next(new Error('Tour ID is required.'));
-    }
-
 
     const existingUser = await User.findById(user);
+    console.log("existingUser",existingUser)
     if (!existingUser) {
       return next(new Error('User not found.'));
     }
 
-
     if (!mongoose.Types.ObjectId.isValid(tour)) {
       return next(new Error('Invalid tour ID format.'));
     }
-
 
     const existingTour = await Tour.findById(tour);
     if (!existingTour) {
       return next(new Error('Tour not found.'));
     }
 
+    // Create booking
     const newBooking = await Booking.create({
       user,
       tour,
@@ -162,13 +154,12 @@ exports.createBooking = catchAsync(async (req, res, next) => {
       paymentId,
       orderId,
     });
-
-    
-
+    console.log("newBooking",newBooking)
     const populatedBooking = await Booking.findById(newBooking._id)
-  .populate('user', 'name email')
-  .populate('tour', 'name');
+      .populate('user', 'name email')
+      .populate('tour', 'name');
 
+      console.log("populatedBooking",populatedBooking)
     res.status(201).json({
       status: 'success',
       data: {

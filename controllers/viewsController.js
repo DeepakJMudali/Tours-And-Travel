@@ -79,21 +79,35 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
 });
 
 
-  exports.getMyTours = catchAsync(async (req, res, next) => {
-    try {
-  
-      const bookings = await Booking.find({ user: req.user.id }).populate('user', 'name email')
-      .populate('tour', 'name');
-      const tourIDs = bookings.map(el => el.tour);
-      const tours = await Tour.find({ _id: { $in: tourIDs } });
-
-      res.status(200).render('overview', {
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  try {
+    // Fetch the user's bookings
+    const bookings = await Booking.find({ user: req.user.id }).populate('user', 'name email').populate('tour', 'name');
+    
+    // Log the bookings to check if they are fetched correctly
+    console.log('User Bookings: ', bookings);
+    
+    if (!bookings.length) {
+      return res.status(200).render('overview', {
         title: 'My Tours',
-        tours
+        message: 'You have no bookings yet.'
       });
-    } catch (err) {
-      next(err); 
     }
-  });
+
+    // Fetch the tour details based on the tour IDs in the bookings
+    const tourIDs = bookings.map(el => el.tour);
+    const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+    // Log the fetched tours to check if they are correct
+    console.log('Tours Found: ', tours);
+
+    res.status(200).render('overview', {
+      title: 'My Tours',
+      tours
+    });
+  } catch (err) {
+    next(err); 
+  }
+});
 
  

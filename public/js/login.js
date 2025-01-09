@@ -24,7 +24,7 @@ import { showAlert } from './alerts';
 };
 
 
-// Optional logout function (Uncomment to use)
+
 export const logout = async () => {
    const url = '/api/v1/users//logout'
   try {
