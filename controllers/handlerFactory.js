@@ -53,7 +53,7 @@ exports.deleteOne = Model =>
       let query = Model.findById(req.params.id);
       if (popOptions) query = query.populate(popOptions);
       const doc = await query;
-  
+      console.log("query",query.populate(popOptions))
       if (!doc) {
         return next(new AppError('No document found with that ID', 404));
       }

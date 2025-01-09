@@ -46,7 +46,7 @@ const filterBody =(reqBodyObj, ...fieldsName)=>
   }
 
 
-//Acccess to admin
+
 exports.getAllUsers = catchAsync(async (req, res,next) => {     
   
 
@@ -63,10 +63,10 @@ exports.getAllUsers = catchAsync(async (req, res,next) => {
 });
 
 exports.getUser = catchAsync(async (req, res) => {
-  const user = await Users.findById({_id: req.params.id})
+  const user = await Users.findById({_id: req.params.id}).populate("bookings")
   if(!user)
   {
-    // for custom error
+
       return next(new AppError("No user found with that ID", 404))
   }
   res.status(200).json({
@@ -76,6 +76,7 @@ exports.getUser = catchAsync(async (req, res) => {
     }
   });
 });
+
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
@@ -95,7 +96,7 @@ exports.deleteUser = (req, res) => {
   });
 };
 
-//req.params.id is useful when you are targeting the single data from entire collection, that time we use req.params.id
+
 
 
 exports.deleteMe = catchAsync(async(req,res,next)=>{ // It will not get deleted from Database
@@ -108,14 +109,14 @@ exports.deleteMe = catchAsync(async(req,res,next)=>{ // It will not get deleted 
 })
 
 
-exports.getMe = (req, res, next) => { // it will fetch the data of current logged in user
-  req.params.id = req.user.id;  // req.user is only for authenticated user or current logged in user
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id; 
   next();
 };
 
 
 
-// Access to loggedin user
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
@@ -142,6 +143,4 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     }
   });
 });
-
-
 

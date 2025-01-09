@@ -5,15 +5,11 @@ const reviewRouter = require("./../routes/reviews")
 const bookingRouter = require("./../routes/bookingRoutes")
 const router = express.Router();
 
-// router.param('id', tourController.checkID);
-// better api enhance with middleware for queryParam
 
 router.use('/:id/bookings', bookingRouter);
-//Tour is parent model of reviews, so we have to use parent route path(tour route).
-//Nested Routes
-router.use("/:tourId/reviews", reviewRouter) // nested routes to get review from tour(parent) routes.
 
-//custom api routes
+router.use("/:tourId/reviews", reviewRouter) 
+
 router.route("/top-5-cheap").get(tourController.aliasTopTours, tourController.getAllTours)
 router.route("/tour-stats").get(tourController.getTourStats);
 
@@ -29,8 +25,6 @@ router.route("/monthly-plans/:year").get(
 
  router.route('/tours-within/:distance/center/:latlng/unit/:unit')
   .get(tourController.getToursWithin);
-// /tours-within?distance=233&center=-40,45&unit=mi
-// /tours-within/233/center/-40,45/unit/mi
 
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 

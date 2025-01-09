@@ -67,20 +67,20 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
     const orderId = payment.order_id;
     const razorpayPaymentId = payment.id;
 
-    // Check if the payment was actually captured
+  
     if (payment.status !== 'captured') {
       return res.status(200).json({ received: true, message: 'Payment not captured. No booking will be created.' });
     }
 
-    // Get the order details from Razorpay
+    
     const order = await razorpay.orders.fetch(orderId);
-    const tourId = order.notes.tour_id;  // Retrieve `tour_id` from notes
-    const userId = order.notes.user_id;  // Retrieve `user_id` from notes
+    const tourId = order.notes.tour_id;  
+    const userId = order.notes.user_id;  
 
-    // Debugging: Log the values from the notes
+
     console.log("Order Notes:", order.notes);
 
-    // Fetch the tour and user details
+ 
     const tour = await Tour.findById(tourId);
     if (!tour) {
       return next(new Error('Tour not found.'));
@@ -91,16 +91,16 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
       return next(new Error('User not found.'));
     }
 
-    // Create the booking
+
     const newBooking = await Booking.create({
       tour: tourId,
       user: user.id,
-      price: order.amount / 100,  // Convert back to INR
+      price: order.amount / 100,  
       paymentId: razorpayPaymentId,
       orderId: orderId,
     });
 
-    // Populate booking with user and tour data
+
     const populatedBooking = await Booking.findById(newBooking._id)
       .populate('user', 'name email')
       .populate('tour', 'name');
@@ -124,10 +124,13 @@ exports.webhookCheckout = catchAsync(async (req, res, next) => {
 
 
 exports.createBooking = catchAsync(async (req, res, next) => {
-  const {tour, price, paymentId, orderId } = req.body;
-  const user = req.user.id; 
+ 
+  const { tour,price, paymentId, orderId } = req.body;
+  const user = req.user.id
+ 
+ console.log("reqqqq",req.body)
   try {
-    if (!user || !tour || !price || !paymentId || !orderId) {
+    if ( !user || !tour || !price || !paymentId || !orderId) {
       return next(new Error('All fields are required.'));
     }
 

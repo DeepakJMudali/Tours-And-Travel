@@ -59,6 +59,12 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt:{
         type: Date
     },
+    bookings: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Booking'
+      }
+    ],
     passwordResetToken: String,
    passwordResetExpires: Date,
    isloggedInUser:{
@@ -97,7 +103,6 @@ userSchema.pre("save", async function(next)
      next();
  })
 
-
 // //query middleware filtered out the data based on property value
 
 // userSchema.pre(/^find/, function(next) {
@@ -127,13 +132,10 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
       return JWTTimestamp < changedTimestamp;  // true means password got changed
     }
   
-    // false means not changed
     return false;
   }
 
-  //Reset password
-  //createPasswordResetToken will be called in authcontroller to trigger forgotPassword controoler
-  userSchema.methods.createPasswordResetToken = async function()// ----------------------> To generate random token for forgotPassword logic
+  userSchema.methods.createPasswordResetToken = async function()
   {
     const resetToken = crypto.randomBytes(32).toString('hex')
     this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest('hex')
@@ -141,7 +143,6 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
     return resetToken;
   }
 
- 
 
 
 const Users = mongoose.model('User',userSchema)
