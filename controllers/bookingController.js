@@ -48,108 +48,52 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 
 
 
-exports.webhookCheckout = catchAsync(async (req, res, next) => {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-
-  
-  const shasum = crypto.createHmac('sha256', secret);
-  shasum.update(req.rawBody);
-  const digest = shasum.digest('hex');
-
-  if (digest !== req.headers['x-razorpay-signature']) {
-    return res.status(400).send('Invalid signature');
-  }
-
-  const event = req.body;
-
-  if (event.event === 'payment.captured') {
-    const payment = event.payload.payment.entity;
-    const orderId = payment.order_id;
-    const razorpayPaymentId = payment.id;
-
-  
-    if (payment.status !== 'captured') {
-      return res.status(200).json({ received: true, message: 'Payment not captured. No booking will be created.' });
-    }
-
-    
-    const order = await razorpay.orders.fetch(orderId);
-    const tourId = order.notes.tour_id;  
-    const userId = order.notes.user_id;  
 
 
-    console.log("Order Notes:", order.notes);
-
- 
-    const tour = await Tour.findById(tourId);
-    if (!tour) {
-      return next(new Error('Tour not found.'));
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return next(new Error('User not found.'));
-    }
-
-
-    const newBooking = await Booking.create({
-      tour: tourId,
-      user: user.id,
-      price: order.amount / 100,  
-      paymentId: razorpayPaymentId,
-      orderId: orderId,
-    });
-
-
-    const populatedBooking = await Booking.findById(newBooking._id)
-      .populate('user', 'name email')
-      .populate('tour', 'name');
-
-    res.status(200).json({
-      received: true,
-      message: 'Payment successful, booking created.',
-      booking: populatedBooking,
-    });
-  } else if (event.event === 'payment.failed') {
-    console.log(`Payment failed: ${event.payload.payment.entity.id}`);
-    res.status(200).json({ received: true, message: 'Payment failed.' });
-  } else if (event.event === 'payment.canceled') {
-    console.log(`Payment canceled: ${event.payload.payment.entity.id}`);
-    res.status(200).json({ received: true, message: 'Payment canceled.' });
-  } else {
-    res.status(200).json({ received: true });
-  }
-});
 
 
 
 exports.createBooking = catchAsync(async (req, res, next) => {
- 
-  const { tour,price, paymentId, orderId } = req.body;
-  const user = req.user.id
- 
- console.log("reqqqq",req.body)
+  // Extract necessary data from the request body or params
+  const { price, paymentId, orderId } = req.body;
+  const user = req.body.user || req.user.id; // Get user from the body or from the session
+  const tour = req.body.tour || req.params.id; // Get tour from body or from params
+  
+  console.log("Request Body:", req.body);
+
   try {
-    if ( !user || !tour || !price || !paymentId || !orderId) {
-      return next(new Error('All fields are required.'));
+    // Validate required fields
+    if (!user || !tour || !price || !paymentId || !orderId) {
+      return next(new Error('All fields (user, tour, price, paymentId, orderId) are required.'));
     }
 
+    // Check if the user exists in the database
     const existingUser = await User.findById(user);
-    console.log("existingUser",existingUser)
     if (!existingUser) {
       return next(new Error('User not found.'));
     }
 
+    // Validate if the tour ID is valid
     if (!mongoose.Types.ObjectId.isValid(tour)) {
       return next(new Error('Invalid tour ID format.'));
     }
 
+    // Check if the tour exists in the database
     const existingTour = await Tour.findById(tour);
     if (!existingTour) {
       return next(new Error('Tour not found.'));
     }
 
-    // Create booking
+    // Fetch payment details from Razorpay API
+    const payment = await razorpay.payments.fetch(paymentId);
+    console.log("Payment Status:", payment.status);
+
+    // If payment status is not 'captured', return an error
+    if (payment.status !== 'captured') {
+      return next(new Error('Payment failed or was not captured.'));
+    }
+
+    // If payment is captured, create a new booking
     const newBooking = await Booking.create({
       user,
       tour,
@@ -157,12 +101,15 @@ exports.createBooking = catchAsync(async (req, res, next) => {
       paymentId,
       orderId,
     });
-    console.log("newBooking",newBooking)
+
+    // Populate booking with user and tour details
     const populatedBooking = await Booking.findById(newBooking._id)
       .populate('user', 'name email')
       .populate('tour', 'name');
 
-      console.log("populatedBooking",populatedBooking)
+    console.log("New Booking Created:", populatedBooking);
+
+    // Send success response with the booking details
     res.status(201).json({
       status: 'success',
       data: {
@@ -170,12 +117,15 @@ exports.createBooking = catchAsync(async (req, res, next) => {
       },
     });
   } catch (error) {
+    // Log and send error response
+    console.error("Error during booking creation:", error);
     res.status(400).json({
       status: 'fail',
-      message: error.message,
+      message: error.message || 'Error during booking creation.',
     });
   }
 });
+
 
 
 

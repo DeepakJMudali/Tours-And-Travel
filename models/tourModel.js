@@ -110,7 +110,7 @@ const tourSchema = new mongoose.Schema(
         type: mongoose.Schema.ObjectId,
         ref: 'User'
       }
-    ]
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -129,15 +129,17 @@ tourSchema.virtual('durationWeaks').get(function(){ // Virtuals are document pro
 });
 
 
-// tour can have many reviews
-// To set the field to model virtually which will not get stored in database.0
 
-//Tour is parent model of review
-
-tourSchema.virtual("reviews",{   // To show multiple reviews in reviews property of tour model 
-  ref :"Review",                 // Target to Review model
+tourSchema.virtual("reviews",{  
+  ref :"Review",                
   foreignField: "tour", 
-  localField:"_id"         // tour is foreign key from review model. To target the reference field from reviw model.
+  localField:"_id"         
+})
+
+tourSchema.virtual("bookings",{  
+  ref :"Booking",                
+  foreignField: "tour", 
+  localField:"_id"        
 })
 
 

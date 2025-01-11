@@ -47,24 +47,44 @@ exports.deleteOne = Model =>
       });
     });
   
-  exports.getOne = (Model, popOptions) =>
-    catchAsync(async (req, res, next) => {
-      
-      let query = Model.findById(req.params.id);
-      if (popOptions) query = query.populate(popOptions);
-      const doc = await query;
-      console.log("query",query.populate(popOptions))
-      if (!doc) {
-        return next(new AppError('No document found with that ID', 404));
-      }
-  
-      res.status(200).json({
-        status: 'success',
-        data: {
-          data: doc
+ 
+    exports.getOne = (Model, popOptions) =>
+      catchAsync(async (req, res, next) => {
+        let query = Model.findById(req.params.id);
+    
+        // Check if population options are passed
+        if (popOptions) {
+          // If it's an array of options, iterate over them and apply populate
+          if (Array.isArray(popOptions)) {
+            popOptions.forEach(option => {
+              query = query.populate(option);
+            });
+          } else {
+            // If it's a single option (not an array), just apply populate once
+            query = query.populate(popOptions);
+          }
         }
+    
+        // Execute the query
+        const doc = await query;
+    
+        // If document is not found, return an error
+        if (!doc) {
+          return next(new AppError('No document found with that ID', 404));
+        }
+    
+        // Send the response with the populated document
+        res.status(200).json({
+          status: 'success',
+          data: {
+            data: doc,
+          },
+        });
       });
-    });
+    
+    
+    
+    
   
   exports.getAll = Model =>
     catchAsync(async (req, res, next) => {

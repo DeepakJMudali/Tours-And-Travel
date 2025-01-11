@@ -62,20 +62,8 @@ exports.getAllUsers = catchAsync(async (req, res,next) => {
   });
 });
 
-exports.getUser = catchAsync(async (req, res) => {
-  const user = await Users.findById({_id: req.params.id}).populate("bookings")
-  if(!user)
-  {
 
-      return next(new AppError("No user found with that ID", 404))
-  }
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user
-    }
-  });
-});
+
 
 exports.createUser = (req, res) => {
   res.status(500).json({
@@ -114,7 +102,21 @@ exports.getMe = (req, res, next) => {
   next();
 };
 
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await Users.findById(req.params.id)
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
 
+  console.log('User data:', user);  // Add this to inspect the user data
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user
+    }
+  });
+});
 
 
 exports.updateMe = catchAsync(async (req, res, next) => {

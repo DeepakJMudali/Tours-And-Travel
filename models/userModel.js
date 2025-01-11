@@ -59,12 +59,7 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt:{
         type: Date
     },
-    bookings: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Booking'
-      }
-    ],
+  
     passwordResetToken: String,
    passwordResetExpires: Date,
    isloggedInUser:{

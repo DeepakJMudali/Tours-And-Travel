@@ -1,8 +1,8 @@
 /* eslint-disable */
 import axios from 'axios';
 import { showAlert } from './alerts';
-require('dotenv').config();
-// To check Razorpay script is loaded before using it
+
+// To check if Razorpay script is loaded before using it
 const loadRazorpayScript = () => {
   return new Promise((resolve, reject) => {
     if (typeof Razorpay !== 'undefined') {
@@ -19,30 +19,28 @@ const loadRazorpayScript = () => {
 };
 
 export const bookTour = async (tourId) => {
-
-
   try {
- 
+    // Ensure Razorpay script is loaded
     await loadRazorpayScript();
 
     const response = await axios.get(`/api/v1/bookings/checkout-session/${tourId}`);
-  
+    console.log("API response:", response.data);  // Log response for debugging
 
     if (response && response.status === 200) {
       const order = response.data.order;
+      console.log("Order details:", order);  // Log order details for debugging
 
-
+      // Razorpay options
       const options = {
-        key: process.env.RAZORPAY_ID_KEY,
+        key: process.env.RAZORPAY_ID_KEY, // Ensure this is correct
         amount: order.amount,
         currency: order.currency,
         name: order.notes.product_name,
         description: order.notes.product_description,
         image: order.notes.image_url,
         order_id: order.id,
-        // callbackUrl : `${req.protocol}://${req.get('host')}/tour?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
         handler: function (paymentResponse) {
-   
+          console.log('Payment successful', paymentResponse);  // Log payment response
           showAlert('success', 'Payment successful!');
         },
         prefill: {
@@ -52,20 +50,22 @@ export const bookTour = async (tourId) => {
         },
         notes: {
           address: "Razorpay Corporate Office"
-         },
+        },
         theme: {
-        "color": "#3399cc",
+          "color": "#3399cc",
         },
       };
 
-   
+      // Create Razorpay instance
       const rzp = new Razorpay(options); 
 
+      // Add event listener for payment failure
       rzp.on('payment.failed', function (response) {
-    
+        console.error('Payment failed', response);  // Log payment failure
         alert(`Payment Failed: ${response.error.description}`);
       });
 
+      // Open the Razorpay payment window
       rzp.open();
     }
   } catch (err) {

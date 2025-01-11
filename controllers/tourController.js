@@ -66,7 +66,23 @@ exports.aliasTopTours=(req,res,next)=>{
 
 
 exports.getAllTours =  factory.getAll(Tour);
-exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+
+exports.getTour = factory.getOne(Tour, [
+  { path: 'reviews' }, // Populate reviews
+  { 
+    path: 'bookings', 
+    populate: [
+      { 
+        path: 'tour', 
+        select:  'name price description' // Include specific fields and exclude others
+      }
+    ]
+  }
+]);
+
+
+
+
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour)
