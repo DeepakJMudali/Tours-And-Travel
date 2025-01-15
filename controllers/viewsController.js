@@ -85,7 +85,7 @@ exports.getMyTours = catchAsync(async (req, res, next) => {
     const bookings = await Booking.find({ user: req.user.id }).populate('user', 'name email').populate('tour', 'name');
     
     // Log the bookings to check if they are fetched correctly
-    console.log('User Bookings: ', bookings);
+  
     
     if (!bookings.length) {
       return res.status(200).render('overview', {

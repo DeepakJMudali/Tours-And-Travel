@@ -91,8 +91,8 @@ hamburger.addEventListener('click', () => {
 if (bookBtn)
   
   bookBtn.addEventListener('click',  async e => {
-    e.target.textContent = 'Processing...';
+    // e.target.textContent = 'Processing...';
     const { tourId } = e.target.dataset;
      await bookTour(tourId);
-    e.target.textContent = 'BOOK TOUR NOW!';
+    // e.target.textContent = 'BOOK TOUR NOW!';
   });

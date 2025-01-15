@@ -46,28 +46,94 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.webhookCheckout = catchAsync(async (req, res, next) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const shasum = crypto.createHmac('sha256', secret);
+  shasum.update(req.rawBody);
+  const digest = shasum.digest('hex');
+
+  // Check the signature validity
+  if (digest !== req.headers['x-razorpay-signature']) {
+    return res.status(400).send('Invalid signature');
+  }
+
+  const event = req.body;
+
+  // Only handle "payment.captured" event for successful payments
+  if (event.event === 'payment.captured') {
+    const payment = event.payload.payment.entity;
+    const orderId = payment.order_id;
+    const razorpayPaymentId = payment.id;
+
+    // If payment is not captured, just return
+    if (payment.status !== 'captured') {
+      return res.status(200).json({ received: true, message: 'Payment not captured. No booking will be created.' });
+    }
+
+    // Fetch order to get tour and user details
+    const order = await razorpay.orders.fetch(orderId);
+    const tourId = order.notes.tour_id;
+    const userId = order.notes.user_id;
+
+    // Fetch the tour and user from DB
+    const tour = await Tour.findById(tourId);
+    if (!tour) {
+      return next(new Error('Tour not found.'));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new Error('User not found.'));
+    }
+
+    // Create the booking only if payment is successful
+    const newBooking = await Booking.create({
+      tour: tourId,
+      user: user.id,
+      price: order.amount / 100,  // Assuming amount in paise
+      paymentId: razorpayPaymentId,
+      orderId: orderId,
+    });
+
+    // Populate booking with user and tour details
+    const populatedBooking = await Booking.findById(newBooking._id)
+      .populate('user', 'name email')
+      .populate('tour', 'name');
+
+    res.status(200).json({
+      received: true,
+      message: 'Payment successful, booking created.',
+      booking: populatedBooking,
+    });
+  } 
+  // Handle payment failure
+  else if (event.event === 'payment.failed') {
+    console.log(`Payment failed: ${event.payload.payment.entity.id}`);
+    return res.status(200).json({ received: true, message: 'Payment failed. No booking created.' });
+  }
+  // Handle payment cancellation
+  else if (event.event === 'payment.canceled') {
+    console.log(`Payment canceled: ${event.payload.payment.entity.id}`);
+    return res.status(200).json({ received: true, message: 'Payment canceled. No booking created.' });
+  } 
+  else {
+    res.status(200).json({ received: true });
+  }
+});
 
 
 
-
-
-
-
-exports.createBooking = catchAsync(async (req, res, next) => {
-  // Extract necessary data from the request body or params
+exports.createBooking = catchAsync(async (req, res,obj, next) => {
   const { price, paymentId, orderId } = req.body;
-  const user = req.body.user || req.user.id; // Get user from the body or from the session
-  const tour = req.body.tour || req.params.id; // Get tour from body or from params
-  
-  console.log("Request Body:", req.body);
+  const user = req.body.user || req.user.id;
+  const tour = req.body.tour || req.params.tourId;
+
 
   try {
-    // Validate required fields
     if (!user || !tour || !price || !paymentId || !orderId) {
       return next(new Error('All fields (user, tour, price, paymentId, orderId) are required.'));
     }
 
-    // Check if the user exists in the database
     const existingUser = await User.findById(user);
     if (!existingUser) {
       return next(new Error('User not found.'));
@@ -88,7 +154,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
     const payment = await razorpay.payments.fetch(paymentId);
     console.log("Payment Status:", payment.status);
 
-    // If payment status is not 'captured', return an error
+    // Ensure payment status is 'captured' before proceeding
     if (payment.status !== 'captured') {
       return next(new Error('Payment failed or was not captured.'));
     }
@@ -125,6 +191,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
     });
   }
 });
+
 
 
 

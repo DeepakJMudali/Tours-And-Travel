@@ -123,8 +123,8 @@ tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
 tourSchema.index({ startLocation: '2dsphere' });
 
-tourSchema.virtual('durationWeaks').get(function(){ // Virtuals are document properties that do not persist or get stored in the MongoDB database,
-   const durationWeeks= this.duration / 7;
+tourSchema.virtual('durationWeaks').get(function(){
+   const durationWeeks=  this.duration ? this.duration / 7 : null;
   return durationWeeks
 });
 
@@ -170,12 +170,16 @@ tourSchema.pre(/^find/,function(next){   // query Midleware
   next();
 })
 
-//To show data of  user's as guide in tours model as parent reference by this.populate
 
-tourSchema.pre(/^find/, function(next){
-  this.populate({path:"guides", select: "-__v -passwordChangedAt"})
+
+tourSchema.pre(/^find/, function(next) {
+  if (!this.options.excludeGuides) {
+    this.populate({ path: 'guides', select: '-__v -passwordChangedAt' });
+  }
   next();
-})
+});
+
+
 
 
 // Aggregation Middleware: To add some custom logic to aggregate, instead of adding in controller level, we can use model level for all aggregate method used in controller.

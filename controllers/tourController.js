@@ -68,17 +68,19 @@ exports.aliasTopTours=(req,res,next)=>{
 exports.getAllTours =  factory.getAll(Tour);
 
 exports.getTour = factory.getOne(Tour, [
-  { path: 'reviews' }, // Populate reviews
-  { 
-    path: 'bookings', 
+  { path: 'reviews' },
+  {
+    path: 'bookings',
     populate: [
-      { 
-        path: 'tour', 
-        select:  'name price description' // Include specific fields and exclude others
+      {
+        path: 'tour',
+        select: 'name price summary imageCover',
+        options: { excludeGuides: true } 
       }
     ]
   }
-]);
+],['durationWeeks'])
+
 
 
 

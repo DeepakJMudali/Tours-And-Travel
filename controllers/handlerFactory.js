@@ -46,66 +46,112 @@ exports.deleteOne = Model =>
         }
       });
     });
-  
- 
-    exports.getOne = (Model, popOptions) =>
+      
+    exports.getOne = (Model, popOptions, excludeVirtuals = []) =>
       catchAsync(async (req, res, next) => {
         let query = Model.findById(req.params.id);
-    
-        // Check if population options are passed
+        
+
         if (popOptions) {
-          // If it's an array of options, iterate over them and apply populate
           if (Array.isArray(popOptions)) {
             popOptions.forEach(option => {
               query = query.populate(option);
             });
           } else {
-            // If it's a single option (not an array), just apply populate once
             query = query.populate(popOptions);
           }
         }
     
-        // Execute the query
-        const doc = await query;
+        const doc = await query.exec();
     
-        // If document is not found, return an error
+        // If document is not found
         if (!doc) {
           return next(new AppError('No document found with that ID', 404));
         }
     
-        // Send the response with the populated document
+        // Convert to plain object with virtuals
+        const docObject = doc.toObject({ virtuals: true });
+    
+        // Remove specified virtual fields
+        const removeVirtuals = (obj) => {
+          excludeVirtuals.forEach((virtualField) => {
+            console.log(`Checking for virtual field: ${virtualField}`);
+            if (obj[virtualField] !== undefined) {
+              console.log(`Removing virtual field: ${virtualField}`);
+              delete obj[virtualField];
+            } else {
+              console.log(`Virtual field not found: ${virtualField}`);
+            }
+          });
+        };
+    
+        // Remove virtual fields from the main document
+        removeVirtuals(docObject);
+    
+        // Remove virtual fields from populated fields
+        if (docObject.bookings && docObject.bookings.length > 0) {
+          docObject.bookings.forEach((booking) => {
+            if (booking.tour) {
+              removeVirtuals(booking.tour);
+            }
+          });
+        }
+    
+        // Send the response
         res.status(200).json({
           status: 'success',
+          data: {
+            data: docObject,
+          },
+        });
+      });
+    
+    
+
+
+
+    exports.getAll = Model =>
+      catchAsync(async (req, res, next) => {
+        // To allow for nested GET reviews on a specific tour
+        let filter = {};
+        let doc ;
+        if (req.params.tourId) filter = { tour: req.params.tourId };
+    
+        // Build the query with APIFeatures
+        if(Model.modelName === "Booking")
+        {
+        const features = new APIFeatures(
+          Model.find(filter).populate({
+            path: 'tour', 
+            select: 'name price summary imageCover',
+          }),
+          req.query
+        )
+          .filter()
+          .sort()
+          .limitFields()
+          .paginate();
+
+           doc = await features.query;
+       }else{
+        const features = new APIFeatures(Model.find(filter), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+       //const doc = await features.query.explain();
+         doc = await features.query;
+       }
+        // Execute the query
+     
+    
+        // Send response
+        res.status(200).json({
+          status: 'success',
+          results: doc.length,
           data: {
             data: doc,
           },
         });
       });
     
-    
-    
-    
-  
-  exports.getAll = Model =>
-    catchAsync(async (req, res, next) => {
-      // To allow for nested GET reviews on tour (hack)
-      let filter = {};
-      if (req.params.tourId) filter = { tour: req.params.tourId };
-  
-      const features = new APIFeatures(Model.find(filter), req.query)
-        .filter()
-        .sort()
-        .limitFields()
-        .paginate();
-       //const doc = await features.query.explain();
-      const doc = await features.query;
-  
-      // SEND RESPONSE
-      res.status(200).json({
-        status: 'success',
-        results: doc.length,
-        data: {
-          data: doc
-        }
-      });
-    });
