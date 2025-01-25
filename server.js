@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const ngrok = require('@ngrok/ngrok');
+//const ngrok = require('@ngrok/ngrok');
 
 // To handle  unCaught error globally
 process.on("uncaughtException", err =>{
@@ -30,7 +30,6 @@ const port = process.env.PORT || 3000;
   console.log(`App running on port ${port}...`);
 });
 
-ngrok.connect({ addr: 3000, authtoken_from_env: true })
-	.then(listener => console.log(`Ingress established at: ${listener.url()}`));
+
 
 
