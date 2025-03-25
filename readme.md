@@ -38,7 +38,8 @@ About This app:
 -    Used pugjs for template engine
 
 Setup .env file
-PORT=3000
-MONGO_URI=your_mongo_uri
-NODE_ENV=development
-JWT_SECRET=your_jwt_secre
+- PORT=3000
+- MONGO_URI=your_mongo_uri
+- NODE_ENV=development
+- JWT_SECRET=your_jwt_secre
+
