@@ -34,6 +34,5 @@ About This app:
 -    Authentication with JWT
 -    Responsive UI
      Used Helmet for security middleware
-     Razor pay paymentGateway
-     Used pugjs for template engine
--     
+     Razor pay paymentGateway  
+-    Used pugjs for template engine
